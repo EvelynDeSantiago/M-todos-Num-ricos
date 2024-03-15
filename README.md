@@ -387,7 +387,64 @@ public class GaussSeidel {
     }
 }
 ## Ejercicio 5:
+public class GaussSeidelEjemplo5 {
 
+    public static void main(String[] args) {
+        double[][] sistemaEcuaciones = {
+                {5, 1, -2, 19},
+                {-3, -4, 1, -28},
+                {2, -1, 6, 31}
+        };
+
+        double[] solucionesIniciales = {0, 0, 0};
+
+        resolverSistema(sistemaEcuaciones, solucionesIniciales, 0.0001, 50);
+    }
+
+    public static void resolverSistema(double[][] matriz, double[] soluciones, double tolerancia, int iteracionesMax) {
+        int filas = matriz.length;
+
+        for (int iteracion = 1; iteracion <= iteracionesMax; iteracion++) {
+            double[] nuevasSoluciones = new double[filas];
+
+            for (int i = 0; i < filas; i++) {
+                double suma = 0;
+                for (int j = 0; j < filas; j++) {
+                    if (j != i) {
+                        suma += matriz[i][j] * soluciones[j];
+                    }
+                }
+                nuevasSoluciones[i] = (matriz[i][filas] - suma) / matriz[i][i];
+            }
+
+            // Comprobar convergencia
+            if (convergencia(soluciones, nuevasSoluciones, tolerancia)) {
+                System.out.println("Soluciones convergen en la iteración " + iteracion + ":");
+                mostrarSoluciones(nuevasSoluciones);
+                return;
+            }
+
+            soluciones = nuevasSoluciones;
+        }
+
+        System.out.println("No se alcanzó convergencia después de " + iteracionesMax + " iteraciones.");
+    }
+
+    private static boolean convergencia(double[] anteriores, double[] actuales, double tolerancia) {
+        for (int i = 0; i < anteriores.length; i++) {
+            if (Math.abs(actuales[i] - anteriores[i]) > tolerancia) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void mostrarSoluciones(double[] soluciones) {
+        for (int i = 0; i < soluciones.length; i++) {
+            System.out.println("x" + (i + 1) + " = " + soluciones[i]);
+        }
+    }
+}
 
 # Método de Jacobi
 En análisis numérico el método de Jacobi es un método iterativo, usado para resolver sistemas de ecuaciones lineales del tipo . El algoritmo toma su nombre del matemático alemán Carl Gustav Jakob Jacobi. El método de Jacobi consiste en usar fórmulas como iteración de punto fijo.
@@ -718,6 +775,64 @@ public class JacobiMethod {
 }
 
 ## Ejercicio 5:
+import java.util.Arrays;
+
+public class MetodoJacobiEjemplo5 {
+
+    public static void main(String[] args) {
+        // Definir el nuevo sistema de ecuaciones
+        double[][] coeficientes = {
+                {5, 2, -3},
+                {1, -4, 1},
+                {2, 1, -5}
+        };
+
+        double[] soluciones = {11, -2, 9}; // Cambiar las soluciones según el nuevo sistema
+
+        // Resolver el sistema utilizando el método de Jacobi
+        double[] resultado = jacobi(coeficientes, soluciones, 0.0001, 100);
+
+        // Imprimir las soluciones
+        System.out.println("Soluciones:");
+        System.out.println(Arrays.toString(resultado));
+    }
+
+    public static double[] jacobi(double[][] coeficientes, double[] soluciones, double tolerancia, int maxIteraciones) {
+        int n = soluciones.length;
+        double[] x = new double[n];
+        double[] xAnterior = new double[n];
+        int iteraciones = 0;
+
+        while (iteraciones < maxIteraciones) {
+            for (int i = 0; i < n; i++) {
+                xAnterior[i] = x[i];
+            }
+
+            for (int i = 0; i < n; i++) {
+                double sum = soluciones[i];
+                for (int j = 0; j < n; j++) {
+                    if (j != i) {
+                        sum -= coeficientes[i][j] * xAnterior[j];
+                    }
+                }
+                x[i] = sum / coeficientes[i][i];
+            }
+
+            double error = 0;
+            for (int i = 0; i < n; i++) {
+                error = Math.max(error, Math.abs(x[i] - xAnterior[i]));
+            }
+
+            if (error < tolerancia) {
+                break;
+            }
+
+            iteraciones++;
+        }
+
+        return x;
+    }
+}
 
 # Método Gauss-Jordan
 Este método debe su nombre a Carl Friedrich Gauss y a Wilhelm jordan. Se trata de una serie de algoritmos del algebra lineal para determinar los resultados de un sistema de ecuaciones lineales y así hallar matrices e inversas. El sistema de Gauss se utiliza para resolver un sistema de ecuaciones y obtener las soluciones por medio de la reducción del sistema dado a otro que sea equivalente en el cual cada una de las ecuaciones tendrá una incógnita menos que la anterior. La matriz que resulta de este proceso lleva el nombre que se conoce como forma escalonada.
@@ -890,6 +1005,124 @@ public class GaussJordan {
 
         // Resolver el sistema de ecuaciones lineales
         gaussJordan(matriz);
+    }
+}
+## Ejercicio 4:
+public class GaussJordanEjemplo4 {
+
+    // Ecuacion a Resolver
+    // 4x - 2y +  z =  9
+    // 3x -  y + 4z = 10
+    // 2x +  y -  z =  8
+
+    public static void main(String[] args) {
+        double[][] matriz = {
+                {4, -2, 1, 9},
+                {3, -1, 4, 10},
+                {2, 1, -1, 8}
+        };
+
+        resolverSistema(matriz);
+    }
+
+    public static void resolverSistema(double[][] matriz) {
+        int filas = matriz.length;
+        int columnas = matriz[0].length;
+
+        // Escalonar la matriz
+        for (int i = 0; i < filas; i++) {
+            double pivote = matriz[i][i];
+            for (int j = i + 1; j < filas; j++) {
+                double factor = matriz[j][i] / pivote;
+                for (int k = i; k < columnas; k++) {
+                    matriz[j][k] -= matriz[i][k] * factor;
+                }
+            }
+        }
+
+        // Reducir la matriz a forma escalonada reducida
+        for (int i = filas - 1; i >= 0; i--) {
+            double pivote = matriz[i][i];
+            for (int j = i - 1; j >= 0; j--) {
+                double factor = matriz[j][i] / pivote;
+                for (int k = i; k < columnas; k++) {
+                    matriz[j][k] -= matriz[i][k] * factor;
+                }
+            }
+        }
+
+        // Normalizar la matriz
+        for (int i = 0; i < filas; i++) {
+            double pivote = matriz[i][i];
+            for (int j = i; j < columnas; j++) {
+                matriz[i][j] /= pivote;
+            }
+        }
+
+        // Imprimir la solución
+        for (int i = 0; i < filas; i++) {
+            System.out.print("x" + (i + 1) + " = " + matriz[i][columnas - 1]);
+            System.out.println();
+        }
+    }
+}
+## Ejercicio 5:
+public class GaussJordanEjemplo5 {
+
+    // Ecuacion a Resolver
+    // 3x -  y + 4z = 7
+    // 2x +  y - 3z = 8
+    //  x - 4y + 2z = 9
+
+    public static void main(String[] args) {
+        double[][] matriz = {
+                {3, -1, 4, 7},
+                {2, 1, -3, 8},
+                {1, -4, 2, 9}
+        };
+
+        resolverSistema(matriz);
+    }
+
+    public static void resolverSistema(double[][] matriz) {
+        int filas = matriz.length;
+        int columnas = matriz[0].length;
+
+        // Escalonar la matriz
+        for (int i = 0; i < filas; i++) {
+            double pivote = matriz[i][i];
+            for (int j = i + 1; j < filas; j++) {
+                double factor = matriz[j][i] / pivote;
+                for (int k = i; k < columnas; k++) {
+                    matriz[j][k] -= matriz[i][k] * factor;
+                }
+            }
+        }
+
+        // Reducir la matriz a forma escalonada reducida
+        for (int i = filas - 1; i >= 0; i--) {
+            double pivote = matriz[i][i];
+            for (int j = i - 1; j >= 0; j--) {
+                double factor = matriz[j][i] / pivote;
+                for (int k = i; k < columnas; k++) {
+                    matriz[j][k] -= matriz[i][k] * factor;
+                }
+            }
+        }
+
+        // Normalizar la matriz
+        for (int i = 0; i < filas; i++) {
+            double pivote = matriz[i][i];
+            for (int j = i; j < columnas; j++) {
+                matriz[i][j] /= pivote;
+            }
+        }
+
+        // Imprimir la solución
+        for (int i = 0; i < filas; i++) {
+            System.out.print("x" + (i + 1) + " = " + matriz[i][columnas - 1]);
+            System.out.println();
+        }
     }
 }
 
@@ -1088,6 +1321,88 @@ JOptionPane.showMessageDialog(null, "Ecuaciones por Eliminación Gaussiana");
             mensaje.append("x[").append(i + 1).append("] = ").append(soluciones[i]).append("\n");
         }
         JOptionPane.showMessageDialog(null, mensaje.toString());
+    }
+}
+## Ekercicio 4:
+public class EliminacionGaussianaEjemplo5 {
+
+    public static void main(String[] args) {
+        double[][] matriz = {{3, -1, 4, 7},
+                {2, 1, -3, 8},
+                {1, -4, 2, 9}};
+
+        double[] soluciones = resolverSistema(matriz);
+
+        System.out.println("Soluciones:");
+        for (int i = 0; i < soluciones.length; i++) {
+            System.out.println("x" + (i+1) + " = " + soluciones[i]);
+        }
+    }
+
+    public static double[] resolverSistema(double[][] matriz) {
+        int n = matriz.length;
+        double[] soluciones = new double[n];
+
+        // Eliminación hacia adelante
+        for (int i = 0; i < n; i++) {
+            for (int k = i+1; k < n; k++) {
+                double factor = matriz[k][i] / matriz[i][i];
+                for (int j = i; j < n+1; j++) {
+                    matriz[k][j] -= factor * matriz[i][j];
+                }
+            }
+        }
+
+        // Sustitución hacia atrás
+        for (int i = n-1; i >= 0; i--) {
+            soluciones[i] = matriz[i][n] / matriz[i][i];
+            for (int k = i-1; k >= 0; k--) {
+                matriz[k][n] -= matriz[k][i] * soluciones[i];
+            }
+        }
+
+        return soluciones;
+    }
+}
+## Ejercicio 5:
+public class EliminacionGaussianaEjemplo4 {
+
+    public static void main(String[] args) {
+        double[][] matriz = {{4, -2, 1, 9},
+                {3, -1, 4, 10},
+                {2, 1, -1, 8}};
+
+        double[] soluciones = resolverSistema(matriz);
+
+        System.out.println("Soluciones:");
+        for (int i = 0; i < soluciones.length; i++) {
+            System.out.println("x" + (i+1) + " = " + soluciones[i]);
+        }
+    }
+
+    public static double[] resolverSistema(double[][] matriz) {
+        int n = matriz.length;
+        double[] soluciones = new double[n];
+
+        // Eliminación hacia adelante
+        for (int i = 0; i < n; i++) {
+            for (int k = i+1; k < n; k++) {
+                double factor = matriz[k][i] / matriz[i][i];
+                for (int j = i; j < n+1; j++) {
+                    matriz[k][j] -= factor * matriz[i][j];
+                }
+            }
+        }
+
+        // Sustitución hacia atrás
+        for (int i = n-1; i >= 0; i--) {
+            soluciones[i] = matriz[i][n] / matriz[i][i];
+            for (int k = i-1; k >= 0; k--) {
+                matriz[k][n] -= matriz[k][i] * soluciones[i];
+            }
+        }
+
+        return soluciones;
     }
 }
 
