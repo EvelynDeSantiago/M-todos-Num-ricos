@@ -265,79 +265,61 @@ public class GaussSeidel {
 }
 
 ## Ejercicio 3:
-package programa;
-import consola.Menu;
-import consola.MenuCallback;
-import funcion.*;
-import metodos.*;
-import java.io.*;
-public class MetodoGaussSeidel {
+public class GaussSeidel {
+    
+    static final int MAX_ITERATIONS = 100;
+    static final double TOLERANCE = 0.0001;
+
     public static void main(String[] args) {
+        double[][] coefficients = {
+            {10, -1, 2, 0},
+            {-1, 11, -1, 3},
+            {2, -1, 10, -1},
+            {0, 3, -1, 8}
+        };
+        double[] initialValues = {0, 0, 0, 0};
+        double[] solutions = gaussSeidel(coefficients, initialValues);
+        System.out.println("Solutions:");
+        for (int i = 0; i < solutions.length; i++) {
+            System.out.println("x[" + i + "] = " + solutions[i]);
+        }
+    }
 
-        final GaussSeidel metodo = new GaussSeidel();
+    public static double[] gaussSeidel(double[][] coefficients, double[] initialValues) {
+        int n = coefficients.length;
+        double[] solutions = new double[n];
+        double[] newSolutions = new double[n];
+        int iterations = 0;
+        double error;
 
-        Menu menu = new Menu();
-        menu.setTitulo("Gauss-Seidel");
-        Menu submenu = new Menu();
-        submenu.agregar("Matriz 1", new MenuCallback() {
-            public void ejecutar() {
-
-                double[][] matriz = new double[3][4];
-              matriz[0][0] = 3;
-                matriz[0][1] = -0.2;
-                matriz[0][2] = -0.5;
-                matriz[0][3] = 8;
-
-                matriz[1][0] = 0.1;
-                matriz[1][1] = 7;
-                matriz[1][2] = 0.4;
-                matriz[1][3] = -19.5;
-
-                matriz[2][0] = 0.4;
-                matriz[2][1] = -0.1;
-                matriz[2][2] = 10;
-                matriz[2][3] = 72.4;
-
-                metodo.evaluar(matriz, 0.01, 100);
+        do {
+            for (int i = 0; i < n; i++) {
+                double sum = 0.0;
+                for (int j = 0; j < n; j++) {
+                    if (j != i) {
+                        sum += coefficients[i][j] * newSolutions[j];
+                    }
+                }
+                newSolutions[i] = (initialValues[i] - sum) / coefficients[i][i];
             }
-        });
-        submenu.agregar("Matriz 2", new MenuCallback() {
-            public void ejecutar() {
 
-                double[][] matriz = new double[3][4];
-                // lo ordene manualmente
-
-                matriz[0][0] = -5;
-                matriz[0][1] = 1.4;
-                matriz[0][2] = -2.7;
-                matriz[0][3] = 94.2;
-
-                matriz[1][0] = 3.3;
-                matriz[1][1] = -11;
-                matriz[1][2] = 4.4;
-                matriz[1][3] = -27.5;
-
-                matriz[2][0] = 0.7;
-                matriz[2][1] = -2.5;
-                matriz[2][2] = 15;
-                matriz[2][3] = -6;
-
-
-                metodo.evaluar(matriz, 0.01, 100);
+            error = 0.0;
+            for (int i = 0; i < n; i++) {
+                error = Math.max(error, Math.abs(newSolutions[i] - solutions[i]));
+                solutions[i] = newSolutions[i];
             }
-        });
 
-        menu.agregar("Ejercicios", submenu);
-        menu.agregar("Ingresar Matriz", new MenuCallback() {
-            public void ejecutar() {
+            iterations++;
+        } while (error > TOLERANCE && iterations < MAX_ITERATIONS);
 
-                metodo.consola();
-            }
-        });
-        menu.mostrar();
+        if (iterations >= MAX_ITERATIONS) {
+            System.out.println("Maximum iterations reached without convergence");
+        }
 
+        return solutions;
     }
 }
+
 
 
 # Método de Jacobi
@@ -479,14 +461,64 @@ public class MetodoJacobi {
     }
 }
 ## Ejercicio 2:
-public static void Jacobi(double M[][], double v[], double v1[], double v2[], int m) {
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < m; j++) {
-            if (i != j) {
-                v2[i] += M[i][j] * v1[j];
+public class JacobiMethod {
+
+    public static double[] jacobi(double[][] A, double[] b, int maxIterations, double tolerance) {
+        int n = A.length;
+        double[] x = new double[n];
+        double[] x_new = new double[n];
+        int iter = 0;
+        double error = tolerance + 1; // Inicializar el error con un valor mayor que la tolerancia
+        
+        // Comenzar iteraciones
+        while (iter < maxIterations && error > tolerance) {
+            for (int i = 0; i < n; i++) {
+                double sum = 0;
+                for (int j = 0; j < n; j++) {
+                    if (j != i) {
+                        sum += A[i][j] * x[j];
+                    }
+                }
+                x_new[i] = (b[i] - sum) / A[i][i];
+            }
+            
+            // Calcular el error
+            error = calculateError(x, x_new);
+            
+            // Actualizar el vector x con los nuevos valores
+            System.arraycopy(x_new, 0, x, 0, n);
+            
+            iter++;
+        }
+        
+        return x;
+    }
+    
+    // Método para calcular el error entre dos iteraciones consecutivas
+    private static double calculateError(double[] x, double[] x_new) {
+        double max = Math.abs(x_new[0] - x[0]);
+        for (int i = 1; i < x.length; i++) {
+            double error = Math.abs(x_new[i] - x[i]);
+            if (error > max) {
+                max = error;
             }
         }
-        v2[i] = (v[i] - v2[i]) / M[i][i];
+        return max;
+    }
+
+    public static void main(String[] args) {
+        double[][] A = {{4, 1, 2}, {3, 5, 1}, {1, 1, 3}};
+        double[] b = {4, 7, 3};
+        int maxIterations = 1000;
+        double tolerance = 1e-6;
+
+        double[] solution = jacobi(A, b, maxIterations, tolerance);
+
+        // Mostrar la solución
+        System.out.println("Solución encontrada:");
+        for (double value : solution) {
+            System.out.println(value);
+        }
     }
 }
 ## Ejercicio 3:
@@ -872,7 +904,15 @@ public class EliminacionGaussiana {
 }
 
 ## Ejercicio 3:
-JOptionPane.showMessageDialog(null, "Resolución de un Sistema de Ecuaciones por Eliminación Gaussiana");
+package eliminaciongaussiana;
+
+import java.util.Scanner;
+import javax.swing.JOptionPane;
+
+public class EliminacionGaussiana {
+
+    public static void main(String[] args) {
+JOptionPane.showMessageDialog(null, "Ecuaciones por Eliminación Gaussiana");
 
         int n = Integer.parseInt(JOptionPane.showInputDialog("Ingrese el número de ecuaciones: "));
         float[][] matriz = new float[n][n + 1];
@@ -894,6 +934,23 @@ JOptionPane.showMessageDialog(null, "Resolución de un Sistema de Ecuaciones por
                 }
             }
         }
+
+        float[] soluciones = new float[n];
+        for (int i = n - 1; i >= 0; i--) {
+            float suma = 0;
+            for (int j = i + 1; j < n; j++) {
+                suma += matriz[i][j] * soluciones[j];
+            }
+            soluciones[i] = (matriz[i][n] - suma) / matriz[i][i];
+        }
+
+        StringBuilder mensaje = new StringBuilder("Soluciones:\n");
+        for (int i = 0; i < n; i++) {
+            mensaje.append("x[").append(i + 1).append("] = ").append(soluciones[i]).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, mensaje.toString());
+    }
+}
 
 # INTEGRANTES: Equipo 2
 López Gutierrez Nili Estefanía
