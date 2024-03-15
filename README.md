@@ -319,7 +319,74 @@ public class GaussSeidel {
         return solutions;
     }
 }
-
+## Ejercicio 4:
+public class GaussSeidel {
+    
+    public static void main(String[] args) {
+        double[][] coeficientes = {{12, 3, -5}, {3, -8, -3}, {5, 4, -12}}; // Coeficientes de las variables
+        double[] constantes = {1, 1, 3}; // Términos constantes del sistema de ecuaciones
+        double[] solucionInicial = {0, 0, 0}; // Suposición inicial para las soluciones
+        
+        int iteracionesMaximas = 100; // Número máximo de iteraciones
+        double tolerancia = 0.0001; // Tolerancia para la convergencia
+        
+        double[] solucion = gaussSeidel(coeficientes, constantes, solucionInicial, iteracionesMaximas, tolerancia);
+        
+        // Imprimir la solución
+        System.out.println("Solución:");
+        for (int i = 0; i < solucion.length; i++) {
+            System.out.println("x" + (i+1) + " = " + solucion[i]);
+        }
+    }
+    
+    // Método de Gauss-Seidel para resolver sistemas de ecuaciones lineales
+    public static double[] gaussSeidel(double[][] coeficientes, double[] constantes, double[] solucionInicial, int iteracionesMaximas, double tolerancia) {
+        int n = constantes.length;
+        double[] solucion = new double[n];
+        double[] solucionAnterior = new double[n];
+        int iteraciones = 0;
+        double error = Double.MAX_VALUE;
+        
+        // Copiar la solución inicial
+        for (int i = 0; i < n; i++) {
+            solucion[i] = solucionInicial[i];
+        }
+        
+        // Iterar hasta que se alcance la tolerancia o el número máximo de iteraciones
+        while (error > tolerancia && iteraciones < iteracionesMaximas) {
+            for (int i = 0; i < n; i++) {
+                solucionAnterior[i] = solucion[i];
+            }
+            
+            for (int i = 0; i < n; i++) {
+                double suma = 0.0;
+                for (int j = 0; j < n; j++) {
+                    if (j != i) {
+                        suma += coeficientes[i][j] * solucion[j];
+                    }
+                }
+                solucion[i] = (constantes[i] - suma) / coeficientes[i][i];
+            }
+            
+            // Calcular el error
+            error = 0.0;
+            for (int i = 0; i < n; i++) {
+                error = Math.max(error, Math.abs(solucion[i] - solucionAnterior[i]));
+            }
+            
+            iteraciones++;
+        }
+        
+        if (error <= tolerancia) {
+            System.out.println("Convergencia alcanzada en " + iteraciones + " iteraciones.");
+        } else {
+            System.out.println("El método no converge en " + iteracionesMaximas + " iteraciones.");
+        }
+        
+        return solucion;
+    }
+}
+## Ejercicio 5:
 
 
 # Método de Jacobi
@@ -577,8 +644,80 @@ public class Jacobi {
         return x;
     }
 }
+## Ejercicio 4:
+public class JacobiMethod {
 
+    // Función para imprimir una matriz
+    public static void printMatrix(double[][] matrix) {
+        int n = matrix.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n + 1; j++) {
+                System.out.print(matrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
 
+    // Función para calcular la norma de la diferencia entre dos vectores
+    public static double norm(double[] v1, double[] v2) {
+        int n = v1.length;
+        double sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += Math.pow((v1[i] - v2[i]), 2);
+        }
+        return Math.sqrt(sum);
+    }
+
+    // Función para resolver el sistema de ecuaciones utilizando el método de Jacobi
+    public static double[] jacobi(double[][] matrix, int maxIterations, double tolerance) {
+        int n = matrix.length;
+        double[] x = new double[n];
+        double[] x_new = new double[n];
+        int iterations = 0;
+
+        while (iterations < maxIterations) {
+            for (int i = 0; i < n; i++) {
+                double sum = matrix[i][n];
+                for (int j = 0; j < n; j++) {
+                    if (j != i) {
+                        sum -= matrix[i][j] * x[j];
+                    }
+                }
+                x_new[i] = sum / matrix[i][i];
+            }
+
+            if (norm(x, x_new) < tolerance) {
+                System.arraycopy(x_new, 0, x, 0, n);
+                break;
+            }
+
+            System.arraycopy(x_new, 0, x, 0, n);
+            iterations++;
+        }
+
+        return x;
+    }
+
+    public static void main(String[] args) {
+        double[][] matrix = {
+            {12, 3, -5, 1},
+            {3, -8, -3, 1},
+            {5, 4, -12, 3}
+        };
+
+        int maxIterations = 1000;
+        double tolerance = 1e-6;
+
+        double[] solution = jacobi(matrix, maxIterations, tolerance);
+
+        System.out.println("Solución:");
+        for (int i = 0; i < solution.length; i++) {
+            System.out.println("x" + (i + 1) + " = " + solution[i]);
+        }
+    }
+}
+
+## Ejercicio 5:
 
 # Método Gauss-Jordan
 Este método debe su nombre a Carl Friedrich Gauss y a Wilhelm jordan. Se trata de una serie de algoritmos del algebra lineal para determinar los resultados de un sistema de ecuaciones lineales y así hallar matrices e inversas. El sistema de Gauss se utiliza para resolver un sistema de ecuaciones y obtener las soluciones por medio de la reducción del sistema dado a otro que sea equivalente en el cual cada una de las ecuaciones tendrá una incógnita menos que la anterior. La matriz que resulta de este proceso lleva el nombre que se conoce como forma escalonada.
